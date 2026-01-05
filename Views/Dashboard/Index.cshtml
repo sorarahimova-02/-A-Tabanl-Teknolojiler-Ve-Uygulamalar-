@@ -1,0 +1,210 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-0">Welcome, @ViewBag.Username!</h2>
+            <p class="text-muted">Here's your financial overview</p>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-white-50">Total Income</h6>
+                            <h2 class="card-title mb-0">$@ViewBag.TotalIncome.ToString("N2")</h2>
+                        </div>
+                        <div class="fs-1 opacity-50">
+                            <i class="bi bi-arrow-up-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-white-50">Total Expenses</h6>
+                            <h2 class="card-title mb-0">$@ViewBag.TotalExpenses.ToString("N2")</h2>
+                        </div>
+                        <div class="fs-1 opacity-50">
+                            <i class="bi bi-arrow-down-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100 @((decimal)ViewBag.Balance >= 0 ? "border-success" : "border-danger")">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Balance</h6>
+                            <h2 class="card-title mb-0 @((decimal)ViewBag.Balance >= 0 ? "text-success" : "text-danger")">
+                                $@ViewBag.Balance.ToString("N2")
+                            </h2>
+                        </div>
+                        <div class="fs-1 @((decimal)ViewBag.Balance >= 0 ? "text-success" : "text-danger")">
+                            <i class="bi bi-wallet2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Chart Section -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0">Expenses by Category</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="expensesChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Recent Transactions</h5>
+                    <a asp-controller="Transaction" asp-action="Index" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    @if (ViewBag.RecentTransactions != null && ((List<Transaction>)ViewBag.RecentTransactions).Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var transaction in (List<Transaction>)ViewBag.RecentTransactions)
+                            {
+                                <div class="list-group-item border-0">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">@transaction.Description</h6>
+                                            <small class="text-muted">@transaction.Category.Name</small>
+                                            <br>
+                                            <small class="text-muted">@transaction.Date.ToString("MMM dd, yyyy")</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge @(transaction.Type == "Income" ? "bg-success" : "bg-danger") fs-6">
+                                                @(transaction.Type == "Income" ? "+" : "-")$@transaction.Amount.ToString("N2")
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <p>No transactions yet</p>
+                            <a asp-controller="Transaction" asp-action="Create" class="btn btn-primary btn-sm">Add Transaction</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Quick Actions</h5>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a asp-controller="Transaction" asp-action="Create" asp-route-type="Income" class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> Add Income
+                        </a>
+                        <a asp-controller="Transaction" asp-action="Create" asp-route-type="Expense" class="btn btn-danger">
+                            <i class="bi bi-dash-circle"></i> Add Expense
+                        </a>
+                        <a asp-controller="Transaction" asp-action="Index" class="btn btn-outline-primary">
+                            <i class="bi bi-list-ul"></i> View All Transactions
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Expenses by Category Chart
+        const expensesData = @Html.Raw(Json.Serialize(ViewBag.ExpensesByCategory ?? new object[0]));
+        
+        if (expensesData && expensesData.length > 0) {
+            const ctx = document.getElementById('expensesChart').getContext('2d');
+            const expensesChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: expensesData.map(item => item.category),
+                    datasets: [{
+                        label: 'Expenses',
+                        data: expensesData.map(item => item.amount),
+                        backgroundColor: [
+                            '#FF6384',
+                            '#36A2EB',
+                            '#FFCE56',
+                            '#4BC0C0',
+                            '#9966FF',
+                            '#FF9F40',
+                            '#FF6384',
+                            '#C9CBCF',
+                            '#4BC0C0',
+                            '#FF6384',
+                            '#36A2EB'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += '$' + context.parsed.toFixed(2);
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            document.getElementById('expensesChart').parentElement.innerHTML = 
+                '<div class="text-center py-5 text-muted"><p>No expense data available</p><p class="small">Add some expense transactions to see the chart</p></div>';
+        }
+    </script>
+}
+

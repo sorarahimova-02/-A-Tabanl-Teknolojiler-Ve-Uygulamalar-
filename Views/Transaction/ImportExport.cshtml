@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "Import / Export Transactions";
+}
+
+<div style="max-width:900px;margin:30px auto;">
+    <h2>Import / Export</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <hr />
+
+    <h4>Export CSV</h4>
+    <a class="btn btn-primary" asp-controller="Transaction" asp-action="ExportCsv">Export CSV</a>
+
+    <hr />
+
+    <h4>Import CSV</h4>
+    <p>CSV columns: <b>Date, Type, Amount, Category, Description</b></p>
+
+    <form asp-action="ImportCsv" asp-controller="Transaction" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <input type="file" name="file" accept=".csv" class="form-control" />
+        <br />
+        <button type="submit" class="btn btn-success">Import CSV</button>
+    </form>
+
+    <hr />
+
+<pre>
+Date,Type,Amount,Category,Description
+2025-12-27,Income,2500,Salary,Monthly salary
+2025-12-27,Expense,25.50,Food,Coffee
+</pre>
+</div>

@@ -1,0 +1,264 @@
+@{
+    ViewData["Title"] = "Settings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-0">Settings</h2>
+            <p class="text-muted">Manage your account settings</p>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Profile Picture Section at Top -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center py-4">
+                    <div class="position-relative d-inline-block mb-3">
+                        <img src="https://ui-avatars.com/api/?name=@ViewBag.User.Username&size=150&background=667eea&color=fff&bold=true" 
+                             alt="Profile Picture" 
+                             class="rounded-circle border border-4 border-primary" 
+                             style="width: 150px; height: 150px; object-fit: cover;" />
+                        <button type="button" class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle" style="width: 40px; height: 40px;" title="Change Picture">
+                            <i class="bi bi-camera"></i>
+                        </button>
+                    </div>
+                    <h4 class="mb-1">@(string.IsNullOrEmpty(ViewBag.User.FullName) ? ViewBag.User.Username : ViewBag.User.FullName)</h4>
+                    <p class="text-muted mb-0">@ViewBag.User.Email</p>
+                    @if (!string.IsNullOrEmpty(ViewBag.User.FullName))
+                    {
+                        <p class="text-muted small mt-1">@ViewBag.User.Username</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Update Profile Section -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white border-0 py-3" style="cursor: pointer;" onclick="toggleSection('profileSection')">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-person"></i> Update Profile
+                        </h5>
+                        <i class="bi bi-chevron-down" id="profileIcon"></i>
+                    </div>
+                </div>
+                <div class="card-body" id="profileSection" style="display: none;">
+                    <!-- Profile Form -->
+                    <form asp-action="EditProfile" method="post">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Username</label>
+                            <input type="text" class="form-control" value="@ViewBag.User.Username" disabled />
+                            <small class="text-muted">Username cannot be changed</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Email Address</label>
+                            <input type="email" name="email" class="form-control" value="@ViewBag.User.Email" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Full Name</label>
+                            <input type="text" name="fullName" class="form-control" value="@ViewBag.User.FullName" placeholder="Enter your full name" />
+                            <small class="text-muted">Optional: Your first and last name</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Phone Number</label>
+                            <input type="tel" name="phoneNumber" class="form-control" value="@ViewBag.User.PhoneNumber" placeholder="Enter your phone number" />
+                            <small class="text-muted">Optional: Include country code (e.g., +1 234 567 8900)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Address</label>
+                            <textarea name="address" class="form-control" rows="3" placeholder="Enter your address">@ViewBag.User.Address</textarea>
+                            <small class="text-muted">Optional: Your street address, city, state, zip code</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Account Created</label>
+                            <input type="text" class="form-control" value="@ViewBag.User.CreatedDate.ToString("MMMM dd, yyyy")" disabled />
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-save"></i> Update Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Change Password Section -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white border-0 py-3" style="cursor: pointer;" onclick="toggleSection('passwordSection')">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-key"></i> Change Password
+                        </h5>
+                        <i class="bi bi-chevron-down" id="passwordIcon"></i>
+                    </div>
+                </div>
+                <div class="card-body" id="passwordSection" style="display: none;">
+                    <form asp-action="ChangePassword" method="post">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Current Password</label>
+                            <input type="password" name="currentPassword" class="form-control" required placeholder="Enter your current password" />
+                            <small class="text-muted">Enter your current password to verify your identity</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">New Password</label>
+                            <input type="password" name="newPassword" id="newPassword" class="form-control" required minlength="6" placeholder="Enter new password" />
+                            <small class="text-muted">Minimum 6 characters required</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Confirm New Password</label>
+                            <input type="password" name="confirmPassword" id="confirmPassword" class="form-control" required minlength="6" placeholder="Confirm new password" />
+                            <small class="text-muted">Re-enter your new password to confirm</small>
+                            <div id="passwordMatch" class="mt-2"></div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="bi bi-key-fill"></i> Change Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Privacy Policy Section -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white border-0 py-3" style="cursor: pointer;" onclick="toggleSection('privacySection')">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-shield-check"></i> Privacy Policy
+                        </h5>
+                        <i class="bi bi-chevron-down" id="privacyIcon"></i>
+                    </div>
+                </div>
+                <div class="card-body" id="privacySection" style="display: none;">
+                    <div class="privacy-content">
+                        <h5 class="mb-3">Our Commitment to Your Privacy</h5>
+                        <p class="text-muted mb-4">
+                            At Finance Budget Tracker, we are committed to protecting your personal information and respecting your privacy. 
+                            This Privacy Policy explains how we collect, use, and safeguard your data.
+                        </p>
+
+                        <h6 class="fw-bold mb-2">1. Information We Collect</h6>
+                        <p class="text-muted mb-3">
+                            We collect information that you provide directly to us, including:
+                        </p>
+                        <ul class="text-muted mb-4">
+                            <li>Account information (username, email, password)</li>
+                            <li>Profile information (name, phone number, address - optional)</li>
+                            <li>Financial transaction data you enter</li>
+                            <li>Category and budget information</li>
+                        </ul>
+
+                        <h6 class="fw-bold mb-2">2. How We Use Your Information</h6>
+                        <p class="text-muted mb-3">
+                            We use the information we collect to:
+                        </p>
+                        <ul class="text-muted mb-4">
+                            <li>Provide and maintain our service</li>
+                            <li>Process your transactions and manage your account</li>
+                            <li>Generate financial reports and analytics</li>
+                            <li>Improve our services and user experience</li>
+                        </ul>
+
+                        <h6 class="fw-bold mb-2">3. Data Security</h6>
+                        <p class="text-muted mb-4">
+                            We implement appropriate security measures to protect your personal information. 
+                            Your passwords are encrypted using secure hashing algorithms. However, no method of 
+                            transmission over the Internet is 100% secure, and we cannot guarantee absolute security.
+                        </p>
+
+                        <h6 class="fw-bold mb-2">4. Data Storage</h6>
+                        <p class="text-muted mb-4">
+                            Your data is stored securely on our servers. We retain your information for as long as 
+                            your account is active or as needed to provide you services.
+                        </p>
+
+                        <h6 class="fw-bold mb-2">5. Your Rights</h6>
+                        <p class="text-muted mb-3">
+                            You have the right to:
+                        </p>
+                        <ul class="text-muted mb-4">
+                            <li>Access and update your personal information</li>
+                            <li>Delete your account and associated data</li>
+                            <li>Request a copy of your data</li>
+                            <li>Opt-out of certain data collection practices</li>
+                        </ul>
+
+                        <h6 class="fw-bold mb-2">6. Contact Us</h6>
+                        <p class="text-muted mb-4">
+                            If you have any questions about this Privacy Policy, please contact us through the 
+                            application settings or support channels.
+                        </p>
+
+                        <div class="alert alert-info">
+                            <strong>Last Updated:</strong> December 26, 2025
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const iconId = sectionId.replace('Section', 'Icon');
+            const icon = document.getElementById(iconId);
+            
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                icon.classList.remove('bi-chevron-down');
+                icon.classList.add('bi-chevron-up');
+            } else {
+                section.style.display = 'none';
+                icon.classList.remove('bi-chevron-up');
+                icon.classList.add('bi-chevron-down');
+            }
+        }
+
+        // Password match validation
+        document.getElementById('confirmPassword')?.addEventListener('input', function() {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = this.value;
+            const matchDiv = document.getElementById('passwordMatch');
+            
+            if (confirmPassword.length > 0) {
+                if (newPassword === confirmPassword) {
+                    matchDiv.innerHTML = '<small class="text-success"><i class="bi bi-check-circle"></i> Passwords match</small>';
+                } else {
+                    matchDiv.innerHTML = '<small class="text-danger"><i class="bi bi-x-circle"></i> Passwords do not match</small>';
+                }
+            } else {
+                matchDiv.innerHTML = '';
+            }
+        });
+    </script>
+}
